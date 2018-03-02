@@ -1,0 +1,11 @@
+Implementarea unui calculator pentru operaţii aritmetice de bază pe placa
+Dragon12 (2 studenţi)
+Caracteristici:
+• Se va folosi tastatura integrată pe placa Dragon12 pentru introducerea
+operanzilor şi a operatorilor;
+• Se vor implementa cel puţin cele 4 operaţii aritmetice de bază (adunare,
+scădere, înmulţire, împărţire);
+• Operanzii, operatorii şi rezultatul vor fi afişate pe LCD-ul plăcii;
+• Se va asigura afişarea rezultatelor care sunt numere întregi, precum şi a
+celor reale;
+• Se va afisa un mesaj de eroare în cazul împărţirii la 0.
