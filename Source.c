@@ -12,11 +12,11 @@
 #define LCD_CTRL PORTK
 #define RS 0x01
 #define EN 0x02
-#define KEYPAD PORTA
+//#define KEYPAD PORTA folosim direct PORTA la verificari
 
 void COMWRT4(unsigned char);
 void DATWRT4(unsigned char);
-void KEYPADSCAN();
+void KEYPADSCAN(); // functie pentru scanarea tastaturii si afisare operator/operand specific
 void MSDelay(unsigned int);
 
 
@@ -24,7 +24,8 @@ void main(void)
 {
 
         DDRK = 0xFF; 
-        DDRA = 0x0F;  
+        DDRA = 0x0F;  //randuri - intrare; coloane - iesiri
+	
         COMWRT4(0x33);   //reset sequence provided by data sheet
         MSDelay(1);
         COMWRT4(0x32);   //reset sequence provided by data sheet
@@ -50,10 +51,9 @@ void main(void)
         DATWRT4('L');
         MSDelay(1);
         DATWRT4('O');
-        */
-        
-        for(;;)       //stay here 
-             KEYPADSCAN();
+        */ 
+	// Sa facem direct in interiorul KeypadScan o bucla infinita
+        KEYPADSCAN();
 
 
 
@@ -107,50 +107,75 @@ void DATWRT4(unsigned char data)
   }
   
 void KEYPADSCAN() {
-        //coloana 1
-         KEYPAD = KEYPAD & 0xF7;
-        while(KEYPAD == 0x77)
-          DATWRT4('/');
-        while(KEYPAD == 0xB7)
-          DATWRT4('*');
-        while(KEYPAD == 0xD7)
-          DATWRT4('-');
-        while(KEYPAD == 0xE7)
-          DATWRT4('+');
-         
-        //coloana 2
-        KEYPAD = KEYPAD & 0xFB;
-        if(KEYPAD == 0x7B)
-          DATWRT4('.');
-        if(KEYPAD == 0xBB)
-          DATWRT4('9');
-        if(KEYPAD == 0xDB)
-          DATWRT4('6');
-        if(KEYPAD == 0xEB)
-          DATWRT4('3');
-         
-        //coloana 3 
-        KEYPAD = KEYPAD & 0xFD;
-        if(KEYPAD == 0x7D)
-          DATWRT4('0');
-        if(KEYPAD == 0xBD)
-          DATWRT4('8');
-        if(KEYPAD == 0xDD)
-          DATWRT4('5');
-        if(KEYPAD == 0xED)
-          DATWRT4('2');
-        
-        //coloana 4  
-        KEYPAD = KEYPAD & 0xFE;
-        if(KEYPAD == 0x7E)
-          DATWRT4('=');
-        if(KEYPAD == 0xBE)
-          DATWRT4('7');
-        if(KEYPAD == 0xDE)
-          DATWRT4('4');
-        if(KEYPAD == 0xEE)
-          DATWRT4('1');
-        
+	unsigned char row, column;
+	
+	while(1){ //stai aici
+		//trebuie facut initial deubounce-ul pentru a nu avea probleme la citire normala
+		//citim orice tasta
+			do{
+				PORTA = PORTA | 0x0F; //setarea coloanelor
+				row = PORTA & 0xF0; //citirea randurilor
+			}while(!(row & 0x00));	// asteapta pana o tasta este apasata
+		
+			do{
+				do{
+					MSDelay(1);
+					row = PORTA & 0xF0; //citire rand
+				}while(!(row & 0x00)); // verificarea apasarii unei taste
+				
+				MSDelay(15); //asteapa pentru debounce
+				row = PORTA & 0xF0;
+			}while(!(row & 0x00)); // fake key press
+		//sfarsit initializare/debounce
+		
+		//citire normala
+		
+		while(1){
+			//coloana 1
+			 KEYPAD = KEYPAD & 0xF7;
+			while(KEYPAD == 0x77)
+			  DATWRT4('/');
+			while(KEYPAD == 0xB7)
+			  DATWRT4('*');
+			while(KEYPAD == 0xD7)
+			  DATWRT4('-');
+			while(KEYPAD == 0xE7)
+			  DATWRT4('+');
+
+			//coloana 2
+			KEYPAD = KEYPAD & 0xFB;
+			if(KEYPAD == 0x7B)
+			  DATWRT4('.');
+			if(KEYPAD == 0xBB)
+			  DATWRT4('9');
+			if(KEYPAD == 0xDB)
+			  DATWRT4('6');
+			if(KEYPAD == 0xEB)
+			  DATWRT4('3');
+
+			//coloana 3 
+			KEYPAD = KEYPAD & 0xFD;
+			if(KEYPAD == 0x7D)
+			  DATWRT4('0');
+			if(KEYPAD == 0xBD)
+			  DATWRT4('8');
+			if(KEYPAD == 0xDD)
+			  DATWRT4('5');
+			if(KEYPAD == 0xED)
+			  DATWRT4('2');
+
+			//coloana 4  
+			KEYPAD = KEYPAD & 0xFE;
+			if(KEYPAD == 0x7E)
+			  DATWRT4('=');
+			if(KEYPAD == 0xBE)
+			  DATWRT4('7');
+			if(KEYPAD == 0xDE)
+			  DATWRT4('4');
+			if(KEYPAD == 0xEE)
+			  DATWRT4('1');
+		}
+	}     
 }
 
 
