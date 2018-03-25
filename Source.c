@@ -115,69 +115,110 @@ void KEYPADSCAN() {
 			do{
 				PORTA = PORTA | 0x0F; //setarea coloanelor
 				row = PORTA & 0xF0; //citirea randurilor
-			}while(!(row & 0x00));	// asteapta pana o tasta este apasata
+			}while(!(row | 0x00));	// asteapta pana o tasta este apasata
 		
 			do{
 				do{
 					MSDelay(1);
 					row = PORTA & 0xF0; //citire rand
-				}while(!(row & 0x00)); // verificarea apasarii unei taste
+				}while(!(row | 0x00)); // verificarea apasarii unei taste
 				
 				MSDelay(15); //asteapa pentru debounce
 				row = PORTA & 0xF0;
-			}while(!(row & 0x00)); // fake key press
+			}while(!(row | 0x00)); // fake key press
 		//sfarsit initializare/debounce
 		
 		//citire normala
-		
 		while(1){
-			//coloana 1
-			 KEYPAD = KEYPAD & 0xF7;
-			while(KEYPAD == 0x77)
-			  DATWRT4('/');
-			while(KEYPAD == 0xB7)
-			  DATWRT4('*');
-			while(KEYPAD == 0xD7)
-			  DATWRT4('-');
-			while(KEYPAD == 0xE7)
-			  DATWRT4('+');
-
+			//coloana 3
+			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
+			PORTA = PORTA | 0x08; //seteaza coloana 3
+			row = PORTA & 0xF0;
+			if(row | 0x00){ //tasta apasata se afla in coloana 3
+				if(row & 0x10){
+					DATWRT4('+');
+				}
+				else if(row & 0x20){
+					DATWRT4('-');
+				}
+				else if(row & 0x40){
+					DATWRT4('*');
+				}
+				else if(row & 0x80){
+					DATWRT4('/');
+				}
+				break; //iesi din bucla infinita
+			}
+			
+			
 			//coloana 2
-			KEYPAD = KEYPAD & 0xFB;
-			if(KEYPAD == 0x7B)
-			  DATWRT4('.');
-			if(KEYPAD == 0xBB)
-			  DATWRT4('9');
-			if(KEYPAD == 0xDB)
-			  DATWRT4('6');
-			if(KEYPAD == 0xEB)
-			  DATWRT4('3');
-
-			//coloana 3 
-			KEYPAD = KEYPAD & 0xFD;
-			if(KEYPAD == 0x7D)
-			  DATWRT4('0');
-			if(KEYPAD == 0xBD)
-			  DATWRT4('8');
-			if(KEYPAD == 0xDD)
-			  DATWRT4('5');
-			if(KEYPAD == 0xED)
-			  DATWRT4('2');
-
-			//coloana 4  
-			KEYPAD = KEYPAD & 0xFE;
-			if(KEYPAD == 0x7E)
-			  DATWRT4('=');
-			if(KEYPAD == 0xBE)
-			  DATWRT4('7');
-			if(KEYPAD == 0xDE)
-			  DATWRT4('4');
-			if(KEYPAD == 0xEE)
-			  DATWRT4('1');
+			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
+			PORTA = PORTA | 0x04; //seteaza coloana 3
+			row = PORTA & 0xF0;
+			if(row | 0x00){ //tasta apasata se afla in coloana 3
+				if(row & 0x10){
+					DATWRT4('3');
+				}
+				else if(row & 0x20){
+					DATWRT4('6');
+				}
+				else if(row & 0x40){
+					DATWRT4('9');
+				}
+				else if(row & 0x80){
+					DATWRT4('.');
+				}
+				break; //iesi din bucla infinita
+			}
+			
+			
+			//coloana 1
+			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
+			PORTA = PORTA | 0x02; //seteaza coloana 3
+			row = PORTA & 0xF0;
+			if(row | 0x00){ //tasta apasata se afla in coloana 3
+				if(row & 0x10){
+					DATWRT4('2');
+				}
+				else if(row & 0x20){
+					DATWRT4('5');
+				}
+				else if(row & 0x40){
+					DATWRT4('8');
+				}
+				else if(row & 0x80){
+					DATWRT4('0');
+				}
+				break; //iesi din bucla infinita
+			}
+			
+			
+			//coloana 0
+			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
+			PORTA = PORTA | 0x01; //seteaza coloana 3
+			row = PORTA & 0xF0;
+			if(row | 0x00){ //tasta apasata se afla in coloana 3
+				if(row & 0x10){
+					DATWRT4('1');
+				}
+				else if(row & 0x20){
+					DATWRT4('4');
+				}
+				else if(row & 0x40){
+					DATWRT4('7');
+				}
+				else if(row & 0x80){
+					DATWRT4('=');
+				}
+				break; //iesi din bucla infinita
+			}
+			
+			row = 0; //tasta negasita
+			break; //iesi din bucla
 		}
-	}     
+	}
+	     
 }
-
 
  void MSDelay(unsigned int itime)
   {
