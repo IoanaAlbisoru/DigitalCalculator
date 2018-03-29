@@ -120,6 +120,30 @@ void itoa(unsigned int rezultat){
     }
     rez[i] = '\0';
 }
+
+void print(){
+      for(i = strlen(rez) - 1; i >= 0; i--){
+      	DATWRT4(rez[i]);
+      	MSDelay(50);
+    }
+}
+
+void printError(){
+	COMWRT4(0xC0);
+	MSDelay(1);
+	DATWRT4('E');
+	MSDelay(1);
+	DATWRT4('R');
+	MSDelay(1);
+	DATWRT4('O');
+	MSDelay(1);
+	DATWRT4('A');
+	MSDelay(1);
+	DATWRT4('R');
+	MSDelay(1);
+	DATWRT4('E');
+	MSDelay(1);
+}
   
 void OPERATIE(){
     unsigned int rezultat;
@@ -128,28 +152,41 @@ void OPERATIE(){
     if(operatie == 0){
       rezultat = operand1 + operand2;
       itoa(rezultat);
+	    print();
     } 
     else if(operatie == 1){
       rezultat = operand1 - operand2;
       itoa(rezultat);
+	    print();
     
     } 
     else if(operatie == 2){
       rezultat = operand1 * operand2;
       itoa(rezultat);
+	    print();
     } 
     else if(operatie == 3){
       if(operand2 == 0){
-        //MESAJEROARE(); //to be determined
+        printError();
       }
-      rezultat = operand1 / operand2;
-      itoa(rezultat);
-    } else {
-      //MESAJEROARE();
-    }
-    for(i = strlen(rez) - 1; i >= 0; i--){
-      DATWRT4(rez[i]);
-      MSDelay(50);
+	if(operand1%operand2 != 0){
+		int parteIntreaga = operand1/operand2;
+		int parteReala = operand1%operand2;
+		itoa(parteIntreaga);
+		print();
+		DATWRT4('.')
+		itoa(parteReala);
+		print();
+	}
+	    else{
+      		rezultat = operand1 / operand2;
+      		itoa(rezultat);
+		print();
+	    }
+	    
+    } 
+    else{
+      	printError();
     }
     exit(0); 
 }
