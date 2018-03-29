@@ -171,7 +171,7 @@ void OPERATIE(){
       }
 	if(operand1%operand2 != 0){
 		int parteIntreaga = operand1/operand2;
-		int parteReala = operand1%operand2;
+		int parteReala = operand1%operand2;        //to be updated
 		itoa(parteIntreaga);
 		print();
 		DATWRT4('.')
