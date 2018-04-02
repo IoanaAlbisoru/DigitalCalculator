@@ -22,15 +22,15 @@ void KEYPADSCAN(); // functie pentru scanarea tastaturii si afisare operator/ope
 void MSDelay(unsigned int);
 void OPERATIE();
 
-unsigned int operand1, operand2;
+unsigned int operand1, operand2, operand3;
 /*
   codificare operatii: 
-  0 -> adunare
+  4 -> adunare
   1 -> scadere
   2 -> inmultire
   3 -> impartire
 */
-unsigned int operatie;
+unsigned int operatie, operatie2;
 unsigned char rez[8];
 
 
@@ -122,6 +122,7 @@ void itoa(unsigned int rezultat){
 }
 
 void print(){
+      int i;
       for(i = strlen(rez) - 1; i >= 0; i--){
       	DATWRT4(rez[i]);
       	MSDelay(50);
@@ -146,36 +147,96 @@ void printError(){
 }
   
 void OPERATIE(){
-    unsigned int rezultat;
-    int i;
+    unsigned int rezultat, parteR = 0;
+    int i, parteReala;
+    float rez;
     
-    if(operatie == 0){
+    if(operatie2 == 2 )
+        operand2 = operand2 * operand3;
+    else if(operatie2 == 3)
+        if(operand3 == 0){
+           printError();
+           exit(0);
+        }
+         else 
+             	if(operand2%operand3 != 0){
+	               	operand2 = operand2/operand3;
+	              	parteReala = operand2%operand3;  
+	              	rez = parteReala/operand3;
+              		rez = rez * 100; 
+              		parteR = (unsigned int)parteReala;
+              	
+            	 } 
+            	 else
+            	    operand2 = operand2 / operand3;
+            	 
+    if(operatie == 4){
+      if(operatie2 != 0){
+         MSDelay(10); 
+        operand2 = operand1 + operand2;
+      
+      } else{  
       rezultat = operand1 + operand2;
-      itoa(rezultat);
-	    print();
+      if(parteR != 0){
+          itoa(rezultat);
+          print();
+          DATWRT4('.');
+          itoa(parteR);
+          print(); 
+      } else{
+          itoa(rezultat);
+	        print();
+      }
+      }
+     
     } 
     else if(operatie == 1){
-      rezultat = operand1 - operand2;
-      itoa(rezultat);
-	    print();
+      if(operatie2 != 0){
+      MSDelay(10);
+      operand2 = operand1 - operand2;       
+      }else{
+           rezultat = operand1 - operand2;
+       if(parteR != 0){
+          itoa(rezultat);
+          print();
+          DATWRT4('.');
+          itoa(parteR);
+          print(); 
+      } else{
+          itoa(rezultat);
+	        print();
+      }
+      }
     
     } 
     else if(operatie == 2){
       rezultat = operand1 * operand2;
-      itoa(rezultat);
-	    print();
+      if(parteR != 0){
+          itoa(rezultat);
+          print();
+          DATWRT4('.');
+          itoa(parteR);
+          print(); 
+      } else{
+          itoa(rezultat);
+	        print();
+      }
     } 
     else if(operatie == 3){
       if(operand2 == 0){
         printError();
+        exit(0);
       }
 	if(operand1%operand2 != 0){
 		int parteIntreaga = operand1/operand2;
-		int parteReala = operand1%operand2;        //to be updated
+		int parteReala = operand1%operand2;  
+		float rez = parteReala/operand2;
+		rez = rez * 100;     
 		itoa(parteIntreaga);
 		print();
-		DATWRT4('.')
-		itoa(parteReala);
+		DATWRT4('.');
+		parteR = (unsigned int)parteReala;
+		itoa(parteR);
 		print();
 	}
 	    else{
@@ -184,11 +245,44 @@ void OPERATIE(){
 		print();
 	    }
 	    
-    } 
+    }
     else{
       	printError();
+      	 exit(0); 
     }
-    exit(0); 
+    if(operatie2 == 4){
+      rezultat = operand2 + operand3;
+      if(parteR != 0){
+          itoa(rezultat);
+          print();
+          DATWRT4('.');
+          itoa(parteR);
+          print(); 
+      } else{
+          itoa(rezultat);
+	        print();
+      }
+    } 
+    else if(operatie2 == 1){
+      rezultat = operand2 - operand3;
+       if(parteR != 0){
+          itoa(rezultat);
+          print();
+          DATWRT4('.');
+          itoa(parteR);
+          print(); 
+      } else{
+          itoa(rezultat);
+	        print();
+      }
+    
+    }
+    else{
+      	printError();
+      	 exit(0); 
+    }  
+    
+   
 }
   
 void KEYPADSCAN() {
@@ -224,22 +318,34 @@ void KEYPADSCAN() {
 			if(row | 0x00){ //tasta apasata se afla in coloana 3
 				if(row & 0x10){
 					DATWRT4('+');
-					operatie = 0;
+					if(contorOperanzi == 2)
+					     operatie2 = 4;
+					else operatie = 4;
+					  
 					contorOperanzi++;
 				}
 				else if(row & 0x20){
 					DATWRT4('-');
-				  operatie = 1;
+				  if(contorOperanzi == 2)
+					     operatie2 = 1;
+					else operatie = 1;
+	
 				  contorOperanzi++; 
 				}
 				else if(row & 0x40){
 					DATWRT4('*');
-				  operatie = 2;
+					if(contorOperanzi == 2)
+					     operatie2 = 2;
+					else operatie = 2;
+					
 				  contorOperanzi++;
 				}
 				else if(row & 0x80){
 					DATWRT4('/');
-				  operatie = 3;
+					if(contorOperanzi == 2)
+					     operatie2 = 3;
+					else operatie = 3;
+					
 				  contorOperanzi++;
 				}
 				break; //iesi din bucla infinita
@@ -258,6 +364,8 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 3;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 3;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 3;
 				}
 				else if(row & 0x20){
 					DATWRT4('6');
@@ -265,6 +373,8 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 6;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 6;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 6;
 				}
 				else if(row & 0x40){
 					DATWRT4('9');
@@ -272,6 +382,8 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 9;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 9;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 9;
 				}
 				else if(row & 0x80){
 					DATWRT4('.');
@@ -290,8 +402,10 @@ void KEYPADSCAN() {
 					DATWRT4('2');
 					if(contorOperanzi == 1)
 					  operand1 = operand1 * 10 + 2;
-					else if(contorOperanzi == 2)
-					  operand2 = operand2 * 10 + 2;
+				else if(contorOperanzi == 2)
+					  operand2 = operand2 * 10 + 9;
+				else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 9;
 				}
 				else if(row & 0x20){
 					DATWRT4('5');
@@ -299,6 +413,8 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 5;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 5;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 5;
 				}
 				else if(row & 0x40){
 					DATWRT4('8');
@@ -306,13 +422,17 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 8;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 8;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 8;
 				}
 				else if(row & 0x80){
 					DATWRT4('0');
 				  if(contorOperanzi == 1)
-					  operand1 = operand1 * 10 + 0;
+					  operand1 = 0;
 					else if(contorOperanzi == 2)
-					  operand2 = operand2 * 10 + 0;
+					  operand2 = 0;
+					else if(contorOperanzi == 3)
+					  operand3 = 0;
 				}
 				break; //iesi din bucla infinita
 			}
@@ -330,6 +450,8 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 1;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 1;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 1;
 				}
 				else if(row & 0x20){
 					DATWRT4('4');
@@ -337,6 +459,8 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 4;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 4;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 4;
 				}
 				else if(row & 0x40){
 					DATWRT4('7');
@@ -344,6 +468,8 @@ void KEYPADSCAN() {
 					  operand1 = operand1 * 10 + 7;
 					else if(contorOperanzi == 2)
 					  operand2 = operand2 * 10 + 7;
+					else if(contorOperanzi == 3)
+					  operand3 = operand3 * 10 + 7;
 				}
 				else if(row & 0x80){
 					DATWRT4('=');
