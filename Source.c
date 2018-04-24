@@ -1,9 +1,3 @@
-//Displaying "HELLO" on LCD for Dragon12+ Trainer Board 
-//with HCS12 Serial Monitor Program installed. This code is for CodeWarrior IDE
-//Modified from Mazidi's book with contribution from Travis Chandler
-//On Dragon12+ LCD data pins of D7-D4 are connected to Pk5-Pk2, En=Pk1,and RS=Pk0,
-
- 
 #include <hidef.h>      /* common defines and macros */
 #include "mc9s12dg256.h"      /* derivative-specific definitions */
 #include<string.h>
@@ -25,12 +19,13 @@ void OPERATIE();
 unsigned int operand1, operand2, operand3;
 /*
   codificare operatii: 
-  4 -> adunare
+  0 -> adunare
   1 -> scadere
   2 -> inmultire
   3 -> impartire
+  4 -> operatie nedefinita
 */
-unsigned int operatie, operatie2;
+unsigned int operatie = 4, operatie2 = 4;
 unsigned char rez[8];
 
 
@@ -110,8 +105,10 @@ void DATWRT4(unsigned char data)
         MSDelay(15);
   }
   
-void itoa(unsigned int rezultat){
+void itoa(int rezultat){
     int i = 0;
+    if(rezultat == 0)
+      rez[i++] = '0';
     while(rezultat != 0){
       rez[i] =  rezultat % 10 + '0';
       rezultat = rezultat / 10;
@@ -147,13 +144,18 @@ void printError(){
 }
   
 void OPERATIE(){
-    unsigned int rezultat, parteR = 0;
+    int rezultat, parteR = 0;
     int i, parteReala;
     float rez;
     
-    if(operatie2 == 2 )
+    if(operatie2 == 2 && (operatie != 2 && operatie != 3)){
+      
         operand2 = operand2 * operand3;
-    else if(operatie2 == 3)
+        itoa(operand2);
+        print();
+        operatie2 = 4;
+    }
+    else if(operatie2 == 3 && (operatie != 2 && operatie != 3))
         if(operand3 == 0){
            printError();
            exit(0);
@@ -167,122 +169,142 @@ void OPERATIE(){
               		parteR = (unsigned int)parteReala;
               	
             	 } 
-            	 else
+            	 else {
+            	  operatie2=4;
             	    operand2 = operand2 / operand3;
+            	 }
             	 
-    if(operatie == 4){
-      if(operatie2 != 0){
+    if(operatie == 0){
+      if(operatie2 != 4){
          MSDelay(10); 
         operand2 = operand1 + operand2;
       
-      } else{  
+      } else{
+      itoa(operand1);
+       print();
+       itoa(operand2);
+       print();  
       rezultat = operand1 + operand2;
-      if(parteR != 0){
+      /*if(parteR != 0){
           itoa(rezultat);
           print();
           DATWRT4('.');
           itoa(parteR);
           print(); 
-      } else{
+      } else{  */
           itoa(rezultat);
 	        print();
-      }
+      //}
       }
      
     } 
     else if(operatie == 1){
-      if(operatie2 != 0){
-      MSDelay(10);
-      operand2 = operand1 - operand2;       
+      if(operatie2 != 4){
+        MSDelay(10);
+        operand2 = operand1 - operand2;       
       }else{
-           rezultat = operand1 - operand2;
-       if(parteR != 0){
+      
+       rezultat = operand1 - operand2;
+       itoa(operand1);
+       print();
+       
+       /*if(parteR != 0){
           itoa(rezultat);
           print();
           DATWRT4('.');
           itoa(parteR);
           print(); 
-      } else{
+      } else{     */
           itoa(rezultat);
 	        print();
-      }
+      //}
       }
     
     } 
     else if(operatie == 2){
+    if(operatie2 != 4){
+      operand2 = operand1 * operand2; 
+      itoa(operand2);
+      print();  
+    } else {
       rezultat = operand1 * operand2;
-      if(parteR != 0){
+      /*if(parteR != 0){
           itoa(rezultat);
           print();
           DATWRT4('.');
           itoa(parteR);
           print(); 
-      } else{
+      } else{*/
           itoa(rezultat);
 	        print();
-      }
-    } 
+      //}*/
+    }
+    }  
     else if(operatie == 3){
-      if(operand2 == 0){
-        printError();
-        exit(0);
-      }
-	if(operand1%operand2 != 0){
-		int parteIntreaga = operand1/operand2;
-		int parteReala = operand1%operand2;  
-		float rez = parteReala/operand2;
-		rez = rez * 100;     
-		itoa(parteIntreaga);
-		print();
-		DATWRT4('.');
-		parteR = (unsigned int)parteReala;
-		itoa(parteR);
-		print();
-	}
-	    else{
-      		rezultat = operand1 / operand2;
-      		itoa(rezultat);
-		print();
-	    }
-	    
+      if(operatie2 == 4){
+        
+        if(operand2 == 0){
+          printError();
+          exit(0);
+        }
+      	if(operand1%operand2 != 0){
+      		int parteIntreaga = operand1/operand2;
+      		int parteReala = operand1%operand2;  
+      		float rez = parteReala/operand2;
+      		rez = rez * 100;     
+      		itoa(parteIntreaga);
+      		print();
+      		DATWRT4('.');
+      		parteR = (unsigned int)parteReala;
+      		itoa(parteR);
+      		print();
+      	}
+  	    else{
+        		rezultat = operand1 / operand2;
+        		itoa(rezultat);
+  	      	print();
+  	    } 
+      } else operand2=operand1/operand2;
     }
     else{
       	printError();
       	 exit(0); 
     }
-    if(operatie2 == 4){
+    if(operatie2 == 0){
       rezultat = operand2 + operand3;
-      if(parteR != 0){
+      /*if(parteR != 0){
           itoa(rezultat);
           print();
           DATWRT4('.');
           itoa(parteR);
           print(); 
-      } else{
+      } else{*/
           itoa(rezultat);
 	        print();
-      }
+      //}
     } 
     else if(operatie2 == 1){
       rezultat = operand2 - operand3;
-       if(parteR != 0){
+       /*if(parteR != 0){
           itoa(rezultat);
           print();
           DATWRT4('.');
           itoa(parteR);
           print(); 
-      } else{
+      } else{  */
           itoa(rezultat);
 	        print();
-      }
+      //}
     
+    } else if(operatie2 == 2){
+      rezultat = operand2 * operand3;
+      itoa(rezultat);
+      print();
+    } else if(operatie2 == 3){
+        rezultat = operand2/operand3;
+      itoa(rezultat);
+      print();
     }
-    else{
-      	printError();
-      	 exit(0); 
-    }  
-    
-   
 }
   
 void KEYPADSCAN() {
@@ -303,7 +325,7 @@ void KEYPADSCAN() {
 					row = PORTA & 0xF0; //citire rand
 				}while(!(row | 0x00)); // verificarea apasarii unei taste
 				
-				MSDelay(50); //asteapta pentru debounce
+				MSDelay(100); //asteapta pentru debounce
 				row = PORTA & 0xF0;
 			}while(!(row | 0x00)); // fake key press
 		//sfarsit initializare/debounce
@@ -313,14 +335,14 @@ void KEYPADSCAN() {
 			//coloana 3
 			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
 			PORTA = PORTA | 0x08; //seteaza coloana 3
-			MSDelay(1);
+			MSDelay(10);
 			row = PORTA & 0xF0;
 			if(row | 0x00){ //tasta apasata se afla in coloana 3
 				if(row & 0x10){
 					DATWRT4('+');
 					if(contorOperanzi == 2)
-					     operatie2 = 4;
-					else operatie = 4;
+					     operatie2 = 0;
+					else operatie = 0;
 					  
 					contorOperanzi++;
 				}
@@ -355,7 +377,7 @@ void KEYPADSCAN() {
 			//coloana 2
 			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
 			PORTA = PORTA | 0x04; //seteaza coloana 2
-			MSDelay(1);
+			MSDelay(10);
 			row = PORTA & 0xF0;
 			if(row | 0x00){ //tasta apasata se afla in coloana 2
 				if(row & 0x10){
@@ -395,7 +417,7 @@ void KEYPADSCAN() {
 			//coloana 1
 			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
 			PORTA = PORTA | 0x02; //seteaza coloana 1
-			MSDelay(1);
+			MSDelay(10);
 			row = PORTA & 0xF0;
 			if(row | 0x00){ //tasta apasata se afla in coloana 1
 				if(row & 0x10){
@@ -403,9 +425,9 @@ void KEYPADSCAN() {
 					if(contorOperanzi == 1)
 					  operand1 = operand1 * 10 + 2;
 				else if(contorOperanzi == 2)
-					  operand2 = operand2 * 10 + 9;
+					  operand2 = operand2 * 10 + 2;
 				else if(contorOperanzi == 3)
-					  operand3 = operand3 * 10 + 9;
+					  operand3 = operand3 * 10 + 2;
 				}
 				else if(row & 0x20){
 					DATWRT4('5');
@@ -441,7 +463,7 @@ void KEYPADSCAN() {
 			//coloana 0
 			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
 			PORTA = PORTA | 0x01; //seteaza coloana 0
-			MSDelay(1);
+			MSDelay(10);
 			row = PORTA & 0xF0;
 			if(row | 0x00){ //tasta apasata se afla in coloana 0
 				if(row & 0x10){
@@ -490,5 +512,4 @@ void KEYPADSCAN() {
     for(i=0;i<itime;i++)
       for(j=0;j<4000;j++);
  }
- 
  
