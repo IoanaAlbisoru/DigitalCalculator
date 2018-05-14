@@ -1,5 +1,5 @@
 - implementare 2 operatii succesive  --> DONE
 - schema hard -> se pot lua din documentatie imaginile si doar se conecteaza (tastatura + LCD + microcontroller)
 - nu functiona operatia de genu: x*y+z --> DONE
-- sa functioneze si pentru numere negative --> ALMOST DONE
-- functionare si pentru 2 * 5 / 2 (inmultirea sa se faca cu float) --> ALMOST DONE
+- sa functioneze si pentru numere negative --> DONE
+- functionare si pentru 2 * 5 / 2 (inmultirea sa se faca cu float) --> DONE
