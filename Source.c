@@ -146,7 +146,7 @@ void printError(){
 void OPERATIE(){
     int rezultat, parteR = 0;
     int i, parteReala;
-    float r;
+    float r = 0.0;
     
     if(operatie2 == 2 && (operatie != 2 && operatie != 3)){
       
@@ -161,11 +161,11 @@ void OPERATIE(){
          else 
              	if(operand2%operand3 != 0){
 	               	operand2 = operand2/operand3;
-	              	parteReala = operand2%operand3;  
-	              	r = parteReala/operand3;
-              		r = r * 100; 
-              		parteR = (unsigned int)parteReala;
-              	
+	              	parteReala = operand2%operand3;
+	              	parteReala = parteReala * 100;  
+	              	r = r + parteReala/operand3; 
+              		parteR = (int)r;
+              	  operatie2 = 4;
             	 } 
             	 else {
             	  operatie2=4;
@@ -179,22 +179,22 @@ void OPERATIE(){
       
       } else{
       if(operand2 < 0){ //TBC  inm cu -1
-          DATWRT4('-')
+          DATWRT4('-');
       }
         rezultat = operand1 + operand2;
-      /*if(parteR != 0){
+        if(parteR != 0){
           itoa(rezultat);
           print();
           DATWRT4('.');
           itoa(parteR);
           print(); 
-      } else{  */
+      } else{  
       if(rezultat < 0){
         DATWRT4('-');
       }
           itoa(rezultat);
 	        print();
-      //}
+      }
       }
      
     } 
@@ -221,17 +221,17 @@ void OPERATIE(){
       print();  
     } else {
       rezultat = operand1 * operand2;
-      /*if(parteR != 0){
+      if(parteR != 0){
           itoa(rezultat);
           print();
           DATWRT4('.');
           itoa(parteR);
           print(); 
-      } else{*/
+      } else{
           itoa(rezultat);
 	        print();
-      //}*/
-    }
+      }
+    }                          
     }  
     else if(operatie == 3){
       if(operatie2 == 4){
@@ -241,14 +241,14 @@ void OPERATIE(){
         }
       	if(operand1%operand2 != 0){
       		int parteIntreaga = operand1/operand2;
-      		parteReala = operand1%operand2;          
-      		r = parteReala/operand2;
-      		r = r * 100;     
+      		parteReala = operand1%operand2; 
+      		parteReala = parteReala * 100;         
+      		r = r + parteReala/operand2;   
        		itoa(parteIntreaga);		 		
        		print();		 		
       		DATWRT4('.');
-      		parteR = (int)r;			
-      		itoa(parteR);
+      		//parteR = (int)r;			
+      		itoa(r);
        		print();		 	
       	}
   	    else{
@@ -287,9 +287,23 @@ void OPERATIE(){
       itoa(rezultat);
       print();
     } else if(operatie2 == 3){
-        rezultat = operand2/operand3;
-        itoa(rezultat);
-        print();
+      if(operand2%operand3 != 0){
+      		int parteIntreaga = operand2/operand3;
+      		parteReala = operand2%operand3; 
+      		parteReala = parteReala * 100;         
+      		r = r + parteReala/operand3;   
+       		itoa(parteIntreaga);		 		
+       		print();		 		
+      		DATWRT4('.');
+      		//parteR = (int)r;			
+      		itoa(r);
+       		print();		 	
+      	}
+  	    else{
+        		rezultat = operand2 / operand3;
+        		itoa(rezultat);
+  	      	print(); 
+  	    }
         
     }
 }
