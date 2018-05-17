@@ -337,34 +337,34 @@ void KEYPADSCAN() {
 			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
 			PORTA = PORTA | 0x08; //seteaza coloana 3
 			MSDelay(10);
-			row = PORTA & 0xF0;
+			row = PORTA & 0xF0; //sterge configuratia anterioara a randurilor
 			if(row | 0x00){ //tasta apasata se afla in coloana 3
-				if(row & 0x10){
-					DATWRT4('+');
+				if(row & 0x10){ //daca tasta apasata se afla pe randul 1
+					DATWRT4('+'); //inseamna ca s-a apasat pe "+"
 					if(contorOperanzi == 2)
 					     operatie2 = 0;
 					else operatie = 0;
 					  
 					contorOperanzi++;
 				}
-				else if(row & 0x20){
-					DATWRT4('-');
+				else if(row & 0x20){ //daca tasta apasata se afla pe randul 2
+					DATWRT4('-'); //inseamna ca s-a apasat pe "-"
 				  if(contorOperanzi == 2)
 					     operatie2 = 1;
 					else operatie = 1;
 	
 				  contorOperanzi++; 
 				}
-				else if(row & 0x40){
-					DATWRT4('*');
+				else if(row & 0x40){ //daca tasta apasata se afla pe randul 3
+					DATWRT4('*'); //inseamna ca s-a apasat pe "*"
 					if(contorOperanzi == 2)
 					     operatie2 = 2;
 					else operatie = 2;
 					
 				  contorOperanzi++;
 				}
-				else if(row & 0x80){
-					DATWRT4('/');
+				else if(row & 0x80){ //daca tasta apasata se afla pe randul 4
+					DATWRT4('/'); //inseamna ca s-a apasat pe "/"
 					if(contorOperanzi == 2)
 					     operatie2 = 3;
 					else operatie = 3;
@@ -379,9 +379,9 @@ void KEYPADSCAN() {
 			PORTA = PORTA & 0xF0; //sterge configuratia anterioara a coloanelor
 			PORTA = PORTA | 0x04; //seteaza coloana 2
 			MSDelay(10);
-			row = PORTA & 0xF0;
+			row = PORTA & 0xF0; //sterge configuratia anterioara a randurilor
 			if(row | 0x00){ //tasta apasata se afla in coloana 2
-				if(row & 0x10){
+				if(row & 0x10){ //daca
 					DATWRT4('3');
 					if(contorOperanzi == 1)
 					  operand1 = operand1 * 10 + 3;
