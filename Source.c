@@ -4,19 +4,16 @@
 #include<stdlib.h>
  
   
-#define LCD_DATA PORTK
+#define LCD_DATA PORTK     
 #define LCD_CTRL PORTK
 #define RS 0x01
 #define EN 0x02
-//#define KEYPAD PORTA folosim direct PORTA la verificari
 
 void COMWRT4(unsigned char);
 void DATWRT4(unsigned char);
-void KEYPADSCAN(); // functie pentru scanarea tastaturii si afisare operator/operand specific
-void MSDelay(unsigned int);
-void OPERATIE();
-
-int operand1, operand2, operand3;
+void KEYPADSCAN(); // functie pentru scanarea tastaturii si afisare operatori/operanzi specifici
+void MSDelay(unsigned int); //functie care genereaza timpul de asteptare
+void OPERATIE();   // functie pentru calculul operatiilor unice sau consecutive
 /*
   codificare operatii: 
   0 -> adunare
@@ -25,6 +22,7 @@ int operand1, operand2, operand3;
   3 -> impartire
   4 -> operatie nedefinita
 */
+int operand1, operand2, operand3;
 unsigned int operatie = 4, operatie2 = 4;
 unsigned char rez[8];
 
@@ -32,39 +30,37 @@ unsigned char rez[8];
 void main(void) 
 {
 
-        DDRK = 0xFF; 
-        DDRA = 0x0F;  //randuri - intrare; coloane - iesiri
+        DDRK = 0xFF;     // pinii portului K sunt setati ca iesiri
+        DDRA = 0x0F;     // pinii 0-3 (coloanele tastaturii) ai portului A sunt setati ca iesiri
+	                 // pinii 4-7 (randurile tastaturii) ai portului A sunt setati ca intrari
 	
-        COMWRT4(0x33);   //reset sequence provided by data sheet
+        COMWRT4(0x33);   // reset sequence provided by data sheet
         MSDelay(1);
-        COMWRT4(0x32);   //reset sequence provided by data sheet
+        COMWRT4(0x32);   // reset sequence provided by data sheet
         MSDelay(1);
-        COMWRT4(0x28);   //Function set to four bit data length
-                                         //2 line, 5 x 7 dot format
+        COMWRT4(0x28);   // function set to four bit data length
+                         // 2 line, 5 x 7 dot format
         MSDelay(1);
-        COMWRT4(0x06);  //entry mode set, increment, no shift
+        COMWRT4(0x06);   // entry mode set, increment, no shift
         MSDelay(1);
-        COMWRT4(0x0E);  //Display set, disp on, cursor on, blink off
+        COMWRT4(0x0E);   // cisplay set, disp on, cursor on, blink off
         MSDelay(1);
-        COMWRT4(0x01);  //Clear display
+        COMWRT4(0x01);   // clear display
         MSDelay(1);
-        COMWRT4(0x80);  //set start posistion, home position
+        COMWRT4(0x80);   // set start posistion, home position
         MSDelay(1);
         
-	// Sa facem direct in interiorul KeypadScan o bucla infinita
-        KEYPADSCAN();
-
-
-
-	
+	KEYPADSCAN();    // facem direct in interiorul functiei o bucla infinita
+	                 // pentru ca utilizatorul sa scrie continuu operanzi/ operatori, 
+	                 // pana se ajunge la "="	
 }
 void COMWRT4(unsigned char command)
   {
         unsigned char x;
         
         x = (command & 0xF0) >> 2;         //shift high nibble to center of byte for Pk5-Pk2
-        LCD_DATA =LCD_DATA & ~0x3C;          //clear bits Pk5-Pk2
-        LCD_DATA = LCD_DATA | x;          //sends high nibble to PORTK
+        LCD_DATA =LCD_DATA & ~0x3C;        //clear bits Pk5-Pk2
+        LCD_DATA = LCD_DATA | x;           //sends high nibble to PORTK
         MSDelay(1);
         LCD_CTRL = LCD_CTRL & ~RS;         //set RS to command (RS=0)
         MSDelay(1);
@@ -73,8 +69,8 @@ void COMWRT4(unsigned char command)
         LCD_CTRL = LCD_CTRL & ~EN;         //Drop enable to capture command
         MSDelay(15);                       //wait
         x = (command & 0x0F)<< 2;          // shift low nibble to center of byte for Pk5-Pk2
-        LCD_DATA =LCD_DATA & ~0x3C;         //clear bits Pk5-Pk2
-        LCD_DATA =LCD_DATA | x;             //send low nibble to PORTK
+        LCD_DATA =LCD_DATA & ~0x3C;        //clear bits Pk5-Pk2
+        LCD_DATA =LCD_DATA | x;            //send low nibble to PORTK
         LCD_CTRL = LCD_CTRL | EN;          //rais enable
         MSDelay(5);
         LCD_CTRL = LCD_CTRL & ~EN;         //drop enable to capture command
@@ -159,17 +155,17 @@ void OPERATIE(){
            exit(0);
         }
          else 
-             	if(operand2%operand3 != 0){
-	               	operand2 = operand2/operand3;
-	              	parteReala = operand2%operand3;
+             	if(operand2 % operand3 != 0){
+	               	operand2 = operand2 / operand3;
+	              	parteReala = operand2 % operand3;
 	              	parteReala = parteReala * 100;  
 	              	r = r + parteReala/operand3; 
               		parteR = (int)r;
               	  operatie2 = 4;
             	 } 
             	 else {
-            	  operatie2=4;
-            	    operand2 = operand2 / operand3;
+            	  operatie2 = 4;
+            	  operand2 = operand2 / operand3;
             	 }
             	 
     if(operatie == 0){
@@ -246,8 +242,7 @@ void OPERATIE(){
       		r = r + parteReala/operand2;   
        		itoa(parteIntreaga);		 		
        		print();		 		
-      		DATWRT4('.');
-      		//parteR = (int)r;			
+      		DATWRT4('.');			
       		itoa(r);
        		print();		 	
       	}
@@ -289,13 +284,12 @@ void OPERATIE(){
     } else if(operatie2 == 3){
       if(operand2%operand3 != 0){
       		int parteIntreaga = operand2/operand3;
-      		parteReala = operand2%operand3; 
+      		parteReala = operand2 % operand3; 
       		parteReala = parteReala * 100;         
       		r = r + parteReala/operand3;   
        		itoa(parteIntreaga);		 		
        		print();		 		
-      		DATWRT4('.');
-      		//parteR = (int)r;			
+      		DATWRT4('.');			
       		itoa(r);
        		print();		 	
       	}
@@ -381,8 +375,8 @@ void KEYPADSCAN() {
 			MSDelay(10);
 			row = PORTA & 0xF0; //sterge configuratia anterioara a randurilor
 			if(row | 0x00){ //tasta apasata se afla in coloana 2
-				if(row & 0x10){ //daca
-					DATWRT4('3');
+				if(row & 0x10){ //daca pe primul rand se afla 1
+					DATWRT4('3'); //s-a apasat tasta 3
 					if(contorOperanzi == 1)
 					  operand1 = operand1 * 10 + 3;
 					else if(contorOperanzi == 2)
@@ -390,8 +384,8 @@ void KEYPADSCAN() {
 					else if(contorOperanzi == 3)
 					  operand3 = operand3 * 10 + 3;
 				}
-				else if(row & 0x20){
-					DATWRT4('6');
+				else if(row & 0x20){ //daca pe al doilea rand se afla 1
+					DATWRT4('6'); //s-a apasat tasta 6
 				  if(contorOperanzi == 1)
 					  operand1 = operand1 * 10 + 6;
 					else if(contorOperanzi == 2)
@@ -399,8 +393,8 @@ void KEYPADSCAN() {
 					else if(contorOperanzi == 3)
 					  operand3 = operand3 * 10 + 6;
 				}
-				else if(row & 0x40){
-					DATWRT4('9');
+				else if(row & 0x40){ //daca pe al trilea rand se afla 1
+					DATWRT4('9'); //s-a apasat tasta 9
 				  if(contorOperanzi == 1)
 					  operand1 = operand1 * 10 + 9;
 					else if(contorOperanzi == 2)
@@ -408,8 +402,8 @@ void KEYPADSCAN() {
 					else if(contorOperanzi == 3)
 					  operand3 = operand3 * 10 + 9;
 				}
-				else if(row & 0x80){
-					DATWRT4('.');
+				else if(row & 0x80){ //daca pe al patrulea rand se afla 1
+					DATWRT4('.'); //s-a apasat tasta .
 				}
 				break; //iesi din bucla infinita
 			}
@@ -421,7 +415,7 @@ void KEYPADSCAN() {
 			MSDelay(10);
 			row = PORTA & 0xF0;
 			if(row | 0x00){ //tasta apasata se afla in coloana 1
-				if(row & 0x10){
+				if(row & 0x10){ //
 					DATWRT4('2');
 					if(contorOperanzi == 1)
 					  operand1 = operand1 * 10 + 2;
@@ -507,7 +501,7 @@ void KEYPADSCAN() {
 	}	     
 }
 
- void MSDelay(unsigned int itime)
+ void MSDelay(unsigned int itime) 
  {
     unsigned int i; unsigned int j;
     for(i=0;i<itime;i++)
